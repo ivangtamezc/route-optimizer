@@ -13,3 +13,16 @@ class OptimizeTimeResponse(BaseModel):
     order: list[int]
     ordered_points: list[list[float]]
     total_duration_s: float | None = None
+
+class CompareRequest(BaseModel):
+    distance_km: float
+
+class CompareResponse(BaseModel):
+    diesel_cost: float
+    diesel_co2: float
+    electric_cost: float
+    electric_co2: float
+    cost_savings: float
+    co2_reduction: float
+    percent_savings: float
+    trees_equivalent: float

@@ -3,6 +3,8 @@ from fastapi import APIRouter, HTTPException
 from ..models.schemas import OptimizeTimeRequest
 from ..services.osrm_service import table_durations
 from ..services.tsp_solver import solve_tsp
+from ..core.config import get_settings
+from ..models.schemas import CompareRequest, CompareResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

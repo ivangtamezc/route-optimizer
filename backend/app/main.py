@@ -2,7 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .core.config import ALLOWED_ORIGINS
-from .api import route, table, optimize
+from .api import route, table, optimize, compare
 
 # Configure structured logging
 logging.basicConfig(
@@ -23,3 +23,4 @@ app.add_middleware(
 app.include_router(route.router)
 app.include_router(table.router)
 app.include_router(optimize.router)
+app.include_router(compare.router)
