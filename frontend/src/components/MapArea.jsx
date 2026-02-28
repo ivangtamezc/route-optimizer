@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import {
   MapContainer,
@@ -10,12 +11,21 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Custom icons
+// Fix Leaflet default icon paths broken by Vite's asset bundling
+import iconUrl from "leaflet/dist/images/marker-icon.png";
+import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
+import shadowUrl from "leaflet/dist/images/marker-shadow.png";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({ iconUrl, iconRetinaUrl, shadowUrl });
+
+// Custom icons using divIcon (no external image needed)
 const originIcon = L.divIcon({
   html: '<div style="background-color:green;width:16px;height:16px;border-radius:50%;border:2px solid white;"></div>',
   iconSize: [16, 16],
   className: "",
 });
+
 const vehicleIcon = (large = false) =>
   L.divIcon({
     html: `<div style="background-color:red;width:${large ? 24 : 16}px;height:${large ? 24 : 16}px;border-radius:50%;border:2px solid white;"></div>`,

@@ -1,7 +1,14 @@
+
 import os
 
 OSRM_BASE = os.getenv("OSRM_BASE", "https://router.project-osrm.org")
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+
+# ALLOWED_ORIGINS: comma-separated list via env var, with sensible defaults
+_default_origins = ",".join([
+    "http://localhost:5173",
+    "https://route-optimizer-gilt.vercel.app",
+])
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", _default_origins).split(",")
 
 from pydantic_settings import BaseSettings
 from functools import lru_cache
