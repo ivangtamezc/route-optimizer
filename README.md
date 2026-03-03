@@ -1,5 +1,6 @@
 # Route Optimizer
 
+
 Full-stack route optimization application using FastAPI, OSRM, and React/Leaflet.
 
 ## Architecture
