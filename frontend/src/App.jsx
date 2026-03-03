@@ -1,4 +1,6 @@
+
 import React, { useEffect, useRef, useState } from "react";
+import { jsPDF } from "jspdf";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import MapArea from "./components/MapArea";
@@ -15,6 +17,7 @@ export default function App() {
   const [routeLine, setRouteLine] = useState([]);
   const [metrics, setMetrics] = useState({ distance_m: 0, duration_s: 0 });
   const [comparison, setComparison] = useState(null);
+  const [vehicleType, setVehicleType] = useState("Camión");
 
   const [simSpeed, setSimSpeed] = useState(25);
   const speedRef = useRef(simSpeed);
@@ -105,7 +108,6 @@ export default function App() {
       setMetrics({ distance_m: routeData.distance_m, duration_s: routeData.duration_s });
       setVehiclePos(origin);
 
-      // Fetch comparison data
       try {
         const compRes = await fetch(`${API_BASE}/compare`, {
           method: "POST",
@@ -179,6 +181,169 @@ export default function App() {
     rafRef.current = requestAnimationFrame(step);
   }
 
+  // -------------------------------------------------------
+  // PDF GENERATION
+  // -------------------------------------------------------
+  function generatePDF() {
+    const doc = new jsPDF();
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("es-MX", {
+      year: "numeric", month: "long", day: "numeric",
+    });
+    const timeStr = now.toLocaleTimeString("es-MX", {
+      hour: "2-digit", minute: "2-digit",
+    });
+
+    const distance_km = (metrics.distance_m / 1000).toFixed(2);
+    const duration_min = (metrics.duration_s / 60).toFixed(1);
+    const avg_kmh = metrics.duration_s > 0
+      ? ((metrics.distance_m / metrics.duration_s) * 3.6).toFixed(1)
+      : "0.0";
+
+    let y = 18;
+    const lh = 8; // line height
+    const margin = 14;
+    const pageW = 210;
+
+    // ---- Header ----
+    doc.setFillColor(34, 197, 94); // green-500
+    doc.rect(0, 0, pageW, 28, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("EnerRoute Solutions", margin, 12);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Reporte de Ruta Optimizada", margin, 20);
+    doc.text(`${dateStr}  ${timeStr}`, pageW - margin, 20, { align: "right" });
+
+    y = 38;
+    doc.setTextColor(30, 41, 59); // slate-800
+
+    // ---- Tipo de vehículo ----
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Tipo de vehículo:", margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(vehicleType, margin + 42, y);
+    y += lh + 4;
+
+    // ---- Métricas ----
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Métricas de la Ruta", margin, y);
+    y += lh;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, y, pageW - margin, y);
+    y += 5;
+
+    doc.setFontSize(10);
+    const metricRows = [
+      ["Distancia total", `${distance_km} km`],
+      ["Duración estimada", `${duration_min} min`],
+      ["Velocidad promedio", `${avg_kmh} km/h`],
+    ];
+    metricRows.forEach(([label, value]) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(label + ":", margin, y);
+      doc.setFont("helvetica", "normal");
+      doc.text(value, margin + 55, y);
+      y += lh;
+    });
+
+    y += 4;
+
+    // ---- Paradas ----
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Paradas en Orden Optimizado", margin, y);
+    y += lh;
+    doc.line(margin, y, pageW - margin, y);
+    y += 5;
+
+    doc.setFontSize(10);
+    orderedStops.forEach((stop, i) => {
+      const label = i === 0 ? "Origen" : `Parada ${i}`;
+      doc.setFont("helvetica", "bold");
+      doc.text(`${i + 1}. ${label}`, margin, y);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${stop.lat.toFixed(5)}, ${stop.lng.toFixed(5)}`, margin + 50, y);
+      y += lh;
+      if (y > 270) { doc.addPage(); y = 20; }
+    });
+
+    y += 4;
+
+    // ---- Comparación Diesel vs Eléctrico ----
+    if (comparison) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("Comparación: Diesel vs Eléctrico", margin, y);
+      y += lh;
+      doc.line(margin, y, pageW - margin, y);
+      y += 5;
+
+      doc.setFontSize(10);
+
+      // Diesel column
+      doc.setFillColor(241, 245, 249); // slate-100
+      doc.rect(margin, y, 82, 30, "F");
+      doc.setFont("helvetica", "bold");
+      doc.text("Camión Diesel", margin + 4, y + 7);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Costo: $${comparison.diesel_cost.toFixed(2)} MXN`, margin + 4, y + 15);
+      doc.text(`CO2: ${comparison.diesel_co2.toFixed(2)} kg`, margin + 4, y + 22);
+
+      // Electric column
+      doc.setFillColor(220, 252, 231); // green-100
+      doc.rect(margin + 88, y, 82, 30, "F");
+      doc.setFont("helvetica", "bold");
+      doc.text("Camión Eléctrico", margin + 92, y + 7);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Costo: $${comparison.electric_cost.toFixed(2)} MXN`, margin + 92, y + 15);
+      doc.text(`CO2: ${comparison.electric_co2.toFixed(2)} kg`, margin + 92, y + 22);
+
+      y += 38;
+
+      // Savings section
+      doc.setFillColor(219, 234, 254); // blue-100
+      doc.rect(margin, y, 170, 36, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("Ahorro Total", margin + 4, y + 8);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.text(
+        `Ahorro en costo: $${comparison.cost_savings.toFixed(2)} MXN (${comparison.percent_savings.toFixed(1)}%)`,
+        margin + 4, y + 17
+      );
+      doc.text(
+        `Reduccion de CO2: ${comparison.co2_reduction.toFixed(2)} kg`,
+        margin + 4, y + 25
+      );
+      doc.text(
+        `Equivalente a ${comparison.trees_equivalent.toFixed(1)} arboles plantados/año`,
+        margin + 4, y + 33
+      );
+    }
+
+    // ---- Footer ----
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(
+        `EnerRoute Solutions — Página ${i} de ${pageCount}`,
+        pageW / 2, 290, { align: "center" }
+      );
+    }
+
+    doc.save(`EnerRoute_Reporte_${now.toISOString().slice(0, 10)}.pdf`);
+  }
+
+  const hasRoute = routeLine.length >= 2;
+
   return (
     <div className="relative font-sans text-slate-900 bg-slate-100 h-screen flex flex-col">
       <Header />
@@ -193,6 +358,10 @@ export default function App() {
           stopSim={stopSim}
           stops={stops}
           removeStop={removeStop}
+          vehicleType={vehicleType}
+          setVehicleType={setVehicleType}
+          hasRoute={hasRoute}
+          onDownload={generatePDF}
         />
 
         <div className="flex-1 flex justify-center items-start p-6 md:p-8 h-full">
