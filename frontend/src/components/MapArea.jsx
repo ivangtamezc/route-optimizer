@@ -7,6 +7,7 @@ import {
   Polyline,
   Tooltip,
   useMapEvents,
+  useMap,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -33,6 +34,17 @@ const vehicleIcon = (large = false) =>
     className: "",
   });
 
+// Flies the map to new coordinates when centerMap changes
+function FlyToHandler({ centerMap }) {
+  const map = useMap();
+  useEffect(() => {
+    if (centerMap) {
+      map.setView([centerMap.lat, centerMap.lng], 13, { animate: true });
+    }
+  }, [centerMap, map]);
+  return null;
+}
+
 // Click handler that also invalidates size
 function ClickHandler({ onAdd }) {
   const map = useMapEvents({
@@ -55,6 +67,7 @@ export default function MapArea({
   vehiclePos,
   isSimulating,
   onAdd,
+  centerMap,
 }) {
   return (
     <MapContainer
@@ -64,6 +77,7 @@ export default function MapArea({
       className="w-full h-full"
     >
       <ClickHandler onAdd={onAdd} />
+      <FlyToHandler centerMap={centerMap} />
       <TileLayer
         attribution="© OpenStreetMap contributors"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
