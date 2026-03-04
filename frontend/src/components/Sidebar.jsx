@@ -2,6 +2,12 @@
 import React from "react";
 import { FaDownload } from "react-icons/fa";
 
+const CEDIS_ZONES = {
+  topo_chico: "norte",
+  guadalupe:  "oriente",
+  san_pedro:  "sur",
+};
+
 export default function Sidebar({
   modeAdd,
   setModeAdd,
@@ -15,9 +21,39 @@ export default function Sidebar({
   setVehicleType,
   hasRoute,
   onDownload,
+  selectedCedis,
+  onCedisChange,
+  cedisList,
 }) {
   return (
     <aside className="relative w-[260px] min-w-[260px] flex-shrink-0 h-full overflow-y-auto bg-slate-100 border-r border-gray-200 p-6">
+
+      {/* ── CEDIS selector ── */}
+      <div className="mb-5">
+        <label className="flex items-center space-x-1 text-sm font-medium text-slate-900 mb-2">
+          <span>🏭</span>
+          <span>CEDIS de Origen</span>
+        </label>
+        <select
+          value={selectedCedis.id}
+          onChange={(e) => {
+            const found = cedisList.find((c) => c.id === e.target.value);
+            if (found) onCedisChange(found);
+          }}
+          className="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm"
+        >
+          {cedisList.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nombre}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-slate-500 mt-1">
+          📍 {selectedCedis.unidades} unidades · Zona {CEDIS_ZONES[selectedCedis.id] ?? "—"}
+        </p>
+      </div>
+
+      {/* ── Tipo de vehículo ── */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-slate-900 mb-2">
           Tipo de vehículo
@@ -25,7 +61,7 @@ export default function Sidebar({
         <select
           value={vehicleType}
           onChange={(e) => setVehicleType(e.target.value)}
-          className="block w-full rounded-lg border border-gray-300 bg-white p-2"
+          className="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm"
         >
           <option>Camión</option>
           <option>Van</option>
@@ -33,6 +69,7 @@ export default function Sidebar({
         </select>
       </div>
 
+      {/* ── Botones de acción ── */}
       <div className="flex flex-col space-y-3 mb-6">
         <button
           onClick={optimizeByTime}
@@ -72,6 +109,7 @@ export default function Sidebar({
         </button>
       </div>
 
+      {/* ── Lista de paradas ── */}
       <div>
         <h2 className="text-lg font-semibold text-slate-900 mb-4">Paradas</h2>
         <ol className="space-y-4">

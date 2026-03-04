@@ -10,8 +10,14 @@ import FinancialPage from "./components/FinancialPage";
 import FleetPage from "./components/FleetPage";
 import ScenariosPage from "./components/ScenariosPage";
 
+const CEDIS_LIST = [
+  { id: "topo_chico", nombre: "CEDIS Topo Chico",     lat: 25.7350, lng: -100.3265, unidades: 200 },
+  { id: "guadalupe",  nombre: "CEDIS Guadalupe",       lat: 25.6817, lng: -100.1409, unidades: 165 },
+  { id: "san_pedro",  nombre: "CEDIS San Pedro G.G.",  lat: 25.6755, lng: -100.3613, unidades: 135 },
+];
+
 export default function App() {
-  const defaultCenter = { lat: 25.6866, lng: -100.3161 };
+  const defaultCenter = { lat: CEDIS_LIST[0].lat, lng: CEDIS_LIST[0].lng };
 
   const [modeAdd, setModeAdd] = useState("stop");
   const [origin, setOrigin] = useState(defaultCenter);
@@ -22,6 +28,8 @@ export default function App() {
   const [comparison, setComparison] = useState(null);
   const [vehicleType, setVehicleType] = useState("Camión");
   const [activeTab, setActiveTab] = useState("optimizador");
+  const [selectedCedis, setSelectedCedis] = useState(CEDIS_LIST[0]);
+  const [centerMap, setCenterMap] = useState(null);
 
   const [simSpeed, setSimSpeed] = useState(25);
   const speedRef = useRef(simSpeed);
@@ -57,6 +65,17 @@ export default function App() {
     stopSim();
     setComparison(null);
   }, [origin, stops]);
+
+  function handleCedisChange(cedis) {
+    setSelectedCedis(cedis);
+    setOrigin({ lat: cedis.lat, lng: cedis.lng });
+    setCenterMap({ lat: cedis.lat, lng: cedis.lng });
+    setStops([]);
+    setRouteLine([]);
+    setMetrics({ distance_m: 0, duration_s: 0 });
+    setComparison(null);
+    stopSim();
+  }
 
   function onMapClickAdd(p) {
     if (modeAdd === "origin") setOrigin(p);
@@ -373,6 +392,9 @@ export default function App() {
           setVehicleType={setVehicleType}
           hasRoute={hasRoute}
           onDownload={generatePDF}
+          selectedCedis={selectedCedis}
+          onCedisChange={handleCedisChange}
+          cedisList={CEDIS_LIST}
         />}
 
         {activeTab === "optimizador" && <div className="flex-1 flex justify-center items-start p-6 md:p-8 h-full">
@@ -385,6 +407,7 @@ export default function App() {
               vehiclePos={vehiclePos}
               isSimulating={isSimulating}
               onAdd={onMapClickAdd}
+              centerMap={centerMap}
             />
             <MetricsCard
               distance_m={metrics.distance_m}
