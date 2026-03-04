@@ -6,6 +6,9 @@ import Sidebar from "./components/Sidebar";
 import MapArea from "./components/MapArea";
 import MetricsCard from "./components/MetricsCard";
 import ComparisonPanel from "./components/ComparisonPanel";
+import FinancialPage from "./components/FinancialPage";
+import FleetPage from "./components/FleetPage";
+import ScenariosPage from "./components/ScenariosPage";
 
 export default function App() {
   const defaultCenter = { lat: 25.6866, lng: -100.3161 };
@@ -18,6 +21,7 @@ export default function App() {
   const [metrics, setMetrics] = useState({ distance_m: 0, duration_s: 0 });
   const [comparison, setComparison] = useState(null);
   const [vehicleType, setVehicleType] = useState("Camión");
+  const [activeTab, setActiveTab] = useState("optimizador");
 
   const [simSpeed, setSimSpeed] = useState(25);
   const speedRef = useRef(simSpeed);
@@ -346,10 +350,17 @@ export default function App() {
 
   return (
     <div className="relative font-sans text-slate-900 bg-slate-100 h-screen flex flex-col">
-      <Header />
+      <Header activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="flex flex-1 overflow-hidden pt-16">
-        <Sidebar
+      <div className="flex flex-1 overflow-hidden pt-24">
+        {activeTab !== "optimizador" && (
+          <div className="flex-1 overflow-y-auto">
+            {activeTab === "financiero" && <FinancialPage />}
+            {activeTab === "flota" && <FleetPage />}
+            {activeTab === "escenarios" && <ScenariosPage />}
+          </div>
+        )}
+        {activeTab === "optimizador" && <Sidebar
           modeAdd={modeAdd}
           setModeAdd={setModeAdd}
           optimizeByTime={optimizeByTime}
@@ -362,9 +373,9 @@ export default function App() {
           setVehicleType={setVehicleType}
           hasRoute={hasRoute}
           onDownload={generatePDF}
-        />
+        />}
 
-        <div className="flex-1 flex justify-center items-start p-6 md:p-8 h-full">
+        {activeTab === "optimizador" && <div className="flex-1 flex justify-center items-start p-6 md:p-8 h-full">
           <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-[1000px] h-full overflow-hidden">
             <MapArea
               defaultCenter={defaultCenter}
@@ -382,7 +393,7 @@ export default function App() {
             />
             <ComparisonPanel results={comparison} />
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );
