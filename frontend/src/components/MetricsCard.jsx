@@ -60,7 +60,7 @@ export default function MetricsCard({ distance_m, duration_s, avg_kmh }) {
   const hasRoute = distance_m > 0;
 
   return (
-    <div className="absolute bottom-4 left-4 z-[1000] bg-white bg-opacity-80 backdrop-blur-md rounded-xl p-4 shadow-lg w-64 text-sm">
+    <div className="absolute bottom-4 right-4 z-[1000] bg-white bg-opacity-80 backdrop-blur-md rounded-xl p-3 shadow-lg w-52 text-xs">
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
           <FaTruck className="text-blue-600" />
