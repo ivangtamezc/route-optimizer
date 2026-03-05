@@ -14,8 +14,8 @@ export default function ComparisonPanel({ results }) {
   } = results;
 
   return (
-<div className="absolute bottom-[180px] right-4 z-[1000] bg-white p-4 rounded shadow-lg w-60 space-y-4">
-      <h2 className="text-lg font-bold">Comparación Diesel vs Eléctrico</h2>
+<div className="absolute bottom-[185px] left-4 z-[1000] bg-white p-3 rounded shadow-lg w-52 space-y-3">
+      <h2 className="text-sm font-bold">Comparación Diesel vs Eléctrico</h2>
       <div className="flex space-x-4">
         <div className="flex-1 bg-gray-100 p-3 rounded">
           <h3 className="font-semibold text-gray-700 mb-2">Camión Diesel</h3>
