@@ -6,6 +6,7 @@ import Sidebar from "./components/Sidebar";
 import MapArea from "./components/MapArea";
 import MetricsCard from "./components/MetricsCard";
 import ComparisonPanel from "./components/ComparisonPanel";
+import BatteryCard from "./components/BatteryCard";
 import FinancialPage from "./components/FinancialPage";
 import FleetPage from "./components/FleetPage";
 import ScenariosPage from "./components/ScenariosPage";
@@ -414,6 +415,7 @@ export default function App() {
               duration_s={metrics.duration_s}
               avg_kmh={metrics.duration_s > 0 ? (metrics.distance_m / metrics.duration_s) * 3.6 : 0}
             />
+            <BatteryCard distance_m={metrics.distance_m} />
             <ComparisonPanel results={comparison} />
           </div>
         </div>}
