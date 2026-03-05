@@ -77,7 +77,7 @@ export default function FinancialPage() {
       {/* ── Sección 3: Gráfica ── */}
       <div>
         <h2 className="text-lg font-semibold text-slate-800 mb-4">Proyección OPEX (Diesel 4% vs Eléctrico 2% anual)</h2>
-        <div className="bg-white rounded-2xl p-6 shadow">
+        <div className="bg-white rounded-2xl p-6 shadow" style={{ height: "320px" }}>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={chartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
