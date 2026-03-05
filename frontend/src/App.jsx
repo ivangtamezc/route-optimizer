@@ -105,7 +105,7 @@ export default function App() {
       const body = {
         origin: [origin.lat, origin.lng],
         stops: stops.map((s) => [s.lat, s.lng]),
-        return_to_origin: false,
+        return_to_origin: true,
         time_limit_s: 3,
       };
 
